@@ -1,0 +1,7 @@
+default-select-group = google
+select-group = ipv6
+select-group = outside
+select-group = passcn
+select-group = passv6
+auto-select-group = false
+config-per-group = /etc/ocserv/group
