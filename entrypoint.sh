@@ -1,48 +1,35 @@
 #!/bin/sh
 
-# 配置ocserv.conf文件
-configure_ocserv() {
-    echo "[INFO] 配置ocserv服务器..."
-    
-    # 配置ipv4地址
-    sed -i "/ipv4-network/c\ipv4-network = ${ipv4address}" /etc/ocserv/ocserv.conf
-    sed -i "/ipv4-netmask/c\ipv4-netmask = ${ipv4mask}" /etc/ocserv/ocserv.conf
-
-    # 配置ipv6地址
-    sed -i "/ipv6-network/c\ipv6-network = ${ip6network}" /etc/ocserv/ocserv.conf
-
-    # 配置监听端口
-    sed -i "/tcp-port/c\tcp-port = ${listen_tcp_port}" /etc/ocserv/ocserv.conf
-    sed -i "/udp-port/c\udp-port = ${listen_udp_port}" /etc/ocserv/ocserv.conf
-
-    echo "[INFO] ocserv配置完成"
-}
+# 增加配置ocserv.conf的配置
 
 
+#新修改把echo改为sed 防止多次添加相同配置进去
+#配置ipv4地址
+sed -i "/ipv4-network/c\ipv4-network = ${ipv4address}" /etc/ocserv/ocserv.conf
+sed -i "/ipv4-netmask/c\ipv4-netmask = ${ipv4mask}" /etc/ocserv/ocserv.conf
 
-# 配置NAT转发规则
-configure_nat() {
-    echo "[INFO] 配置NAT转发规则..."
-    
-    
-    # 添加MASQUERADE规则
-    iptables -t nat -A OCSERV_NAT -j MASQUERADE
-    
-    # 添加TCP MSS钳位规则
-    iptables -A OCSERV_FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-    
-    echo "[INFO] NAT转发配置完成"
-}
+#配置ipv6地址
+sed -i "/ipv6-network/c\ipv6-network = ${ip6network}" /etc/ocserv/ocserv.conf
 
-# 主函数
-main() {
-    configure_ocserv
-    #check_ip_forwarding
-    configure_nat
-    
-    echo "[INFO] 容器初始化完成，启动ocserv服务..."
-    exec "$@"
-}
+#配置DNS
+#sed -i "/^dns/c\dns = ${dns1}" /etc/ocserv/ocserv.conf
+#sed -i "/^dns/c\dns = ${dns2}" /etc/ocserv/ocserv.conf
+#sed -i "/^dns/c\dns = ${dns3}" /etc/ocserv/ocserv.conf
+#sed -i "/^dns/c\dns = ${dns4}" /etc/ocserv/ocserv.conf
 
-# 执行主函数
-main
+#配置监听端口
+sed -i "/tcp-port/c\tcp-port = ${listen_tcp_port}" /etc/ocserv/ocserv.conf
+sed -i "/udp-port/c\udp-port = ${listen_udp_port}" /etc/ocserv/ocserv.conf
+
+
+# Open ipv4 ip forward
+#sysctl -w net.ipv4.ip_forward=1
+#sed -i '/net.ipv4.ip_forward/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
+
+
+# Enable NAT forwarding
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+
+# Run OpennConnect Server
+exec "$@"
