@@ -2,5 +2,6 @@ select-group = ipv6
 select-group = outside
 select-group = passcn
 select-group = passv6
+select-group = dz
 auto-select-group = false
 config-per-group = /etc/ocserv/group
