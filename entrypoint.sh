@@ -31,5 +31,24 @@ sed -i "/udp-port/c\udp-port = ${listen_udp_port}" /etc/ocserv/ocserv.conf
 iptables -t nat -A POSTROUTING -j MASQUERADE
 iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
+if grep -q "^net.ipv4.ip_forward" /etc/sysctl.conf; then
+    # 如果配置存在，则替换它
+    sed -i 's/^net.ipv4.ip_forward.*$/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+else
+    # 如果不存在，则添加它
+    echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+fi
+
+
+if grep -q "^net.ipv6.conf.all.forwarding" /etc/sysctl.conf; then
+    # 如果配置存在，则替换它
+    sed -i 's/^net.ipv6.conf.all.forwarding.*$/net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
+else
+    # 如果不存在，则添加它
+    echo "net.ipv6.conf.all.forwarding=1" >> /etc/sysctl.conf
+fi
+
+
+
 # Run OpennConnect Server
 exec "$@"
