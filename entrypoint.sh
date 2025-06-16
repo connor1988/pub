@@ -113,7 +113,7 @@ configure_nat() {
 # 主函数
 main() {
     configure_ocserv
-    check_ip_forwarding
+    #check_ip_forwarding
     configure_nat
     
     echo "[INFO] 容器初始化完成，启动ocserv服务..."
